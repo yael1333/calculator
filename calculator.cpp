@@ -15,8 +15,9 @@
 
 int main()
 {
-	float evaluate(std::vector<std::string> vector, float current_value, std::string operation);
-	std::cout << "ENTER CALCULATION:\n";
+	bool check_input(std::vector<std::string> vector);
+	float evaluate(std::vector<std::string> vector, float current_value, std::string operation);	
+	std::cout << "ENTER CALCULATION:\n(use spaces between characters)\n";
 	std::string calc;
 	getline(std::cin, calc);
 	std::stringstream stream(calc); //creating a stream that holds the input
@@ -28,6 +29,9 @@ int main()
 	{
 		calc_vec.push_back(a);
 	}
+	// chcking if input is valid
+	if (!check_input(calc_vec))
+		return 1;
 	// calling the evaluate function and printing the result
 	float result = evaluate(calc_vec, -1000, "");
 	printf("result: %f\n", result);
@@ -42,6 +46,86 @@ bool is_operation(std::string str)
 		return true;
 	return false;
 }
+
+bool is_float(std::string str) 
+{
+    bool dot_appeared = false;
+	int i = 0;
+	while (i<str.size())
+	{
+		if (str[i]=='.')
+		{
+			if (dot_appeared)
+			{
+				return false;
+			}
+			else
+				dot_appeared = true;
+		}
+		else if (str[i] != '0' && str[i] != '1' && str[i] != '2' && str[i] != '3' && str[i] != '4' && 
+		str[i] != '5' && str[i] != '6' && str[i] != '7' && str[i] != '8' && str[i] != '9' && str[i])
+		{
+			return false;
+		}
+		i++;
+	}
+	return true;
+}
+
+bool check_input(std::vector<std::string> vector)
+{
+	bool is_operation(std::string str);
+	bool is_float(std::string str);
+	int open_par = 0;  // ( count
+	int close_par = 0; // ) count
+	int i = 0; // vector index
+	std::string pre = "";
+	std::string c;
+	while (i<vector.size())
+	{
+		c = vector[i];
+		// checking if one of the characters isn't a number, an operation or a parenthesis
+		if (!is_operation(c) && c!="(" && c!=")" && !(is_float(c)))  
+		{
+			std::cout << "illegal characters or wrong spacing";
+			return false;
+		}
+		// checking if the parentheses are OK
+		if (c=="(")
+			open_par++;
+		else if (c==")")
+			close_par++;
+		if (close_par>open_par)
+		{
+			std::cout << "parentheses don't make sense";
+			return false;
+		}
+		
+		// checking if the order is illegal
+		if (is_operation(pre) && !(is_float(c) || c=="("))
+		{
+			std::cout << "illegal input";
+			return false;
+		}
+		if (pre != "" && is_float(pre) && !(is_operation(c) || c==")"))
+		{
+			std::cout << "illegal input";
+			return false;
+		}
+		
+		pre = c;
+		i++;
+		
+	}
+	if (open_par != close_par)
+	{
+		std::cout << "missing closing parentheses";
+		return false;
+	}
+	return true;
+}
+
+
 
 float evaluate(std::vector<std::string> vector, float current_value, std::string operation)
 // recieves a vector, a float (-1000 by default) and a string, and returns the result of the computation (float)
